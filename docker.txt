@@ -17,4 +17,60 @@ https://github.com/L4oZu1/LearnDocker
 
 
 
+windows环境容器化
+# 设置bios
+连续按两下F1 => BIOS => Virtualization => Enabled，保存&&重启
+
+# 安装docker
+http://77g1a0.com1.z0.glb.clouddn.com/soft/DockerToolbox.exe
+
+# 打开GITBASH
+b.png
+
+# 下载boot2docker.iso
+在群共享中下载boot2docker.iso并复制到C:\Users\Administrator\.docker\machine\cache
+
+# 创建machine
+docker-machine create --engine-registry-mirror=https://s2stkryy.mirror.aliyuncs.com -d virtualbox default
+
+# 启动docker
+a.png
+
+# 验证
+docker run hello-world
+c.png
+
+# 常见问题
+
+## 如果出现以下报错
+1.png
+
+解决方案：eval $("C:\Program Files\Docker Toolbox\docker-machine.exe" env)
+
+
+
+
+
+
+
+
+
+
+toolbox自动更新boot2docker
+
+docker-compose -f docker-compose.dev.yml up -d
+up -d 英文 startup —daemon的意思, 中文意思是 后台启动
+-f 是指名配置文件
+
+
+
+
+
+
+
+
+
+
+
+
 
