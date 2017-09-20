@@ -16,3 +16,8 @@ git rebase develop   //把develop合并到自己的分支如shm_0609
 ... 用git mergetool工具    beyond compare软件  解决冲突  
 git rebase --continue   //继续rebase
 git push --force  //push 到线上
+
+
+
+
+git push -u origin xxx -f
