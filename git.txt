@@ -21,3 +21,19 @@ git push --force  //push 到线上
 
 
 git push -u origin xxx -f
+
+
+
+
+//git rebase 发生冲突
+修改好之后
+git add .
+git rebase --continue
+git push origin xxx -f
+就好了
+
+
+
+
+
+
