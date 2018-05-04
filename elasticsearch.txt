@@ -1,0 +1,64 @@
+使用elasticsearch-jdbc将mysql中的数据导入到elc
+
+1.用logstash
+查看elasticsearch的版本  然后下载对应版本的logstash
+wget https://artifacts.elastic.co/downloads/logstash/logstash-6.2.2.tar.gz
+
+2.解压
+tar -zxvf logstash-6.2.2.tar.gz
+
+3. logstash使用logstash-input-jdbc来读取数据库数据
+进入log stash-6.2.2 
+./bin/logstash-plugin install logstash-input-jdbc
+
+4.需要mysql驱动下载
+mysql 驱动文件位置在 /usr/share/java/mysql-connector-java.jar 
+
+5.建两个文件 
+一个sql语句文件
+文件名（sql.sql） 内容：select * from test
+另一个jdbc.conf
+内容：
+input {  
+    stdin {  
+    }  
+    jdbc {  
+      jdbc_connection_string => "jdbc:mysql://120.25.87.230:3306/test"  
+      jdbc_user => "root"  
+      jdbc_password => "qwe123"  
+      jdbc_driver_library => "/usr/share/java/mysql-connector-java.jar"   
+      jdbc_driver_class => "com.mysql.jdbc.Driver"  
+      jdbc_paging_enabled => "true"  
+      jdbc_page_size => "50000"   
+      statement_filepath => "/root/test/sql.sql"   
+    }  
+}  
+  
+  
+filter {  
+    json {  
+        source => "message"  
+        remove_field => ["message"]  
+    }  
+}  
+  
+  
+output {  
+    elasticsearch {   
+        hosts => ["localhost:9200"]  
+        index => "article"   
+        document_id => "%{id}"  
+        document_type => "testtype"
+    }  
+    stdout {  
+        codec => json_lines  
+    }  
+}  
+
+6.执行
+进入logstash的bin目录  执行 ./logstash -f /root/test/jdbc.conf
+
+
+
+
+
