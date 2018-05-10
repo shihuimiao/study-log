@@ -1,0 +1,76 @@
+solr 
+
+从mysql 导入数据到solr操作
+
+1.先下载jdbc驱动
+wget http://central.maven.org/maven2/mysql/mysql-connector-java/6.0.4/mysql-connector-java-6.0.4.jar （对应的版本可以去这个网址里去找）
+
+2.把/opt/solr/server/solr/configsets/data_driven_schema_configs  文件夹cp到要放core的文件夹下
+我放到了/opt/solr/server/solr/mysolrconf/data_driven_schema_configs （因为用docker挂载了mysolrconf文件夹到宿主机所以我复制到了这个目录下）
+
+3.1 
+ 先修改/opt/solr/server/solr/mysolrconf/data_driven_schema_configs/conf下的solrconfig.xml
+ 在<lib dir="${solr.install.dir:../../../..}/contrib/velocity/lib" regex=".*\.jar" />
+  <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-velocity-\d.*\.jar" />
+ 下面添加
+ 
+  <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-dataimporthandler-.*\.jar" />
+  <lib dir="${solr.install.dir:../../../..}/server/lib/" regex="mysql-connector-java-6.0.4.jar" />
+
+  在<requestHandler name="/select" class="solr.SearchHandler">上面添加
+  <requestHandler name="/dataimport" class="org.apache.solr.handler.dataimport.DataImportHandler">
+    <lst name="defaults">
+      <str name="config">data-config.xml</str>
+    </lst>
+  </requestHandler>
+
+  （其中的data-config.xml是我们的要执行的sql语句相关的自己创建的）
+
+3.2 
+ 创建conf目录下创建data-config.xml
+ 写入
+<dataConfig>
+<dataSource type="JdbcDataSource"
+            driver="com.mysql.jdbc.Driver"
+            url="jdbc:mysql://10.10.10.63:3306/test"
+           user="root"
+           password="123456"/>
+<document>
+  <entity name="test1"
+    pk="id"
+    query="SELECT age,name,id FROM test"
+
+    deltaImportQuery="SELECT age,name,id FROM test WHERE id='{dih.delta.id}'"
+    deltaQuery="SELECT age,name,id FROM test"
+    >
+     <field column="id" name="id"/>
+     <field column="name" name="name"/>
+     <field column="age" name="age"/>
+  </entity>
+</document>
+</dataConfig>
+
+具体网上找怎么写
+
+3.3 修改conf目录下managed-schema
+ 在<field name="_text_" type="text_general" indexed="true" stored="false" multiValued="true"/>
+ 下面添加
+ <field name="name" type="string" indexed="true" stored="true" />
+ <field name="age" type="int" indexed="true" stored="true" />
+ （添加数据库字段，不同表不同）
+
+4.进入solr操作界面localhost:8983
+ 进入Core Admin 点击Add Core
+ name自己写
+ instanceDir是放conf的目录如/opt/solr/server/solr/mysolrconf/data_driven_schema_configs（因为我的conf是放在这的）
+
+5.进入新建的core
+ 选择Dataimport
+ 可以勾上Debug和Auto-Refresh Status
+ 点击Execute
+
+6.进入Query
+ 点击Execute Query 有数据就说明导入成功了
+
+
+
