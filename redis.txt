@@ -1,0 +1,15 @@
+redis    （看了redis 实战  笔记）
+
+
+redis有五种数据结构
+string(字符串)  list(列表)  set(集合)  hash(散列)  zset(有序集合)
+
+
+zinterstore命令  
+zinterstore destination numkeys key1 [key2…] [weights weight1 [weight2…]] [aggregate sum/min/max]  （求 key1, key2 的交集，key1, key2 的权重分别是 weight1, weight2。
+聚合的方法有：sum/min/max。
+聚合的结果保存在 destination 中。）
+这个命令可以求set 和 zset 的集合  排序有用
+
+
+
