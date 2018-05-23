@@ -1,0 +1,9 @@
+mysql   
+
+1.级联查询后更新  可以用来修数据
+update tb1,
+(select * from tb2) as tb2
+set tb1.a=tb2.a,tb1.b=tb2.b
+where tb1.id=tb2.id
+
+
