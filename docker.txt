@@ -1,4 +1,4 @@
-﻿dokcer 有关
+dokcer 有关
 
 https://github.com/L4oZu1/LearnDocker  文章
 
@@ -141,7 +141,63 @@ ps		列出服务相关的容器
 
 
 
-
+docker-compose.yml  例如
+version: '2.0'
+services:
+  php-fpm:
+    image: daocloud.io/xss_er/php:master
+    container_name: strcpy-php
+    restart: always
+    ports:
+      - "9000"
+    volumes:
+      - /www/workone:/var/www/app #work dir
+      - /tmp/wordpress/php7-fpm:/var/run/php7-fpm
+      - /tmp/shm:/dev/shm
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - back-net
+  nginx:
+    image: daocloud.io/xss_er/nginx:laravel
+    container_name: strcpy-nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - /www/workone:/var/www/app #Code
+      - /tmp/php7-fpm:/var/run/php7-fpm
+      - /tmp/shm:/dev/shm
+    depends_on:
+      - php-fpm
+    networks:
+      - back-net
+  mysql:
+    image: daocloud.io/xss_er/db:mysql57
+    container_name: strcpy-mysql-wordpress
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+    ports:
+      - "3306"
+    volumes:
+      - ~/data/mysql:/var/lib/mysql
+    networks:
+      - back-net
+  redis:
+    image: daocloud.io/xss_er/redis:master
+    container_name: strcpy-redis
+    restart: always
+    ports:
+      - "6379"
+    volumes:
+      - ~/data/redis:/data
+    networks:
+      - back-net
+networks:
+  back-net:
+    external: true
 
 
 
