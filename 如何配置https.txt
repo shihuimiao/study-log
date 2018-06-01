@@ -1,0 +1,63 @@
+如何配置https
+
+1.Let's Encrypt是一个提供ssl证书的网址  （https://letsencrypt.org/）  
+2.博客http://diamondfsd.com/lets-encrytp-hand-https/
+
+3.如果要启用HTTPS，我们就需要从证书授权机构(以下简称CA) 处获取一个证书，Let’s Encrypt 就是一个 CA。我们可以从 Let’s Encrypt 获得网站域名的免费的证书。这篇文章也主要讲的是通过 Let’s Encrypt + Nginx 来让网站升级到HTTPS。
+
+4.安装Certbot客户端
+yum install certbot
+
+5.获取证书
+certbot certonly --webroot -w /var/www/example -d example.com -d www.example.com
+（这个命令会为 example.com 和 www.example.com 这两个域名生成一个证书，使用 --webroot 模式会在 /var/www/example 中创建 .well-known 文件夹，这个文件夹里面包含了一些验证文件，certbot 会通过访问 example.com/.well-known/acme-challenge 来验证你的域名是否绑定的这个服务器。这个命令在大多数情况下都可以满足需求，）
+
+6.但是有些时候我们的一些服务并没有根目录，例如一些微服务，这时候使用 --webroot 就走不通了。certbot 还有另外一种模式 --standalone ， 这种模式不需要指定网站根目录，他会自动启用服务器的443端口，来验证域名的归属。我们有其他服务（例如nginx）占用了443端口，就必须先停止这些服务，在证书生成完毕后，再启用。
+certbot certonly --standalone -d example.com -d www.example.com
+
+(因为我的nginx是跑在docker里的  最终我用了这种方法生成)
+
+7.证书生成完毕后，我们可以在 /etc/letsencrypt/live/ 目录下看到对应域名的文件夹，里面存放了指向证书的一些快捷方式。
+
+这时候我们的第一生成证书已经完成了，接下来就是配置我们的web服务器，启用HTTPS。
+
+
+8.Nginx 配置启用 HTTPS
+server {
+        server_name diamondfsd.com www.diamondfsd.com;
+        listen 443;
+        ssl on;
+        ssl_certificate /etc/letsencrypt/live/diamondfsd.com/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/diamondfsd.com/privkey.pem;
+
+        location / {
+           proxy_pass http://127.0.0.1:3999;
+           proxy_http_version 1.1;
+           proxy_set_header X_FORWARDED_PROTO https;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header Host $host;
+        }
+    }
+    server {
+        server_name api.diamondfsd.com;
+        listen 443;
+        ssl on;
+        ssl_certificate /etc/letsencrypt/live/api.diamondfsd.com/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/api.diamondfsd.com/privkey.pem;
+
+        location / {
+           proxy_pass http://127.0.0.1:4999;
+           proxy_http_version 1.1;
+           proxy_set_header X_FORWARDED_PROTO https;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header Host $host;
+
+        }
+    }
+
+
+主要是监听 443 端口，启用 SSL，并配置 SSL 的证书路径（公钥，私钥的路径）。 通过这些配置 我们就已经成功的完成了 Https 的启用。 现在打开我的博客 https://diamondfsd.com 就可以看到标有 安全 的字样。
