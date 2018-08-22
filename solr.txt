@@ -72,5 +72,59 @@ wget http://central.maven.org/maven2/mysql/mysql-connector-java/6.0.4/mysql-conn
 6.进入Query
  点击Execute Query 有数据就说明导入成功了
 
+问题
+导入后发现，web面板中的时间戳时正确的，但是执行sql时，dataimporter.last_index_time获取到的时间时UTC时间。需要在/opt/solr/bin/solr.in.sh中插入SOLR_TIMEZONE="Asia/Shanghai"，然后重启
+
+
+Solr定时增量更新
+data-config.xml中
+<!-- transformer 格式转化：HTMLStripTransformer 索引中忽略HTML标签   ---> 
+  <!--  query:查询数据库表符合记录数据   ---> 
+  <!--  deltaQuery:增量索引查询主键ID    --->    注意这个只能返回ID字段 
+  <!--  deltaImportQuery:增量索引查询导入数据  ---> 
+  <!--  deletedPkQuery:增量索引删除主键ID查询  ---> 注意这个只能返回ID字段
+----
+deltaQuery的意思是，查询出所有经过修改的记录的ID 
+
+可能是修改操作，添加操作，删除操作产生的 
+
+(此查询只对增量导入起作用，而且只能返回ID值) 
+----
+deletedPkQuery此操作值查询那些数据库里伪删除的数据的ID（即isdelete标识为1的数据） 
+
+solr通过它来删除索引里面对应的数据 
+
+(此查询只对增量导入起作用，而且只能返回ID值) 
+----
+deltaImportQuery此查询是获取以上两步的ID，然后把其全部数据获取，根据获取的数据 
+
+对索引库进行更新操作，可能是删除，添加，修改 
+
+(此查询只对增量导入起作用，可以返回多个字段的值,一般情况下，都是返回所有字段的列) 
+
+
+
+
+
+
+
+
+
+
+//solr7 学习   
+1.新建core
+(1)第一种方法 进入/opt/solr/bin，然后输入 solr create -c corename之后回车,会在/opt/solr/server/solr下生成一个corename的新文件（就是新创建的core） 这时可以进入http://localhost:8983/solr  就会看到新建的core了
+(2)第二种方法 直接在/opt/solr/server/solr下创建新文件夹，名字自定义，此处命名为newcore，作为新建的core。
+找到/opt/solr/server/solr/configsets/_default目录下的conf文件夹，然后拷贝一份到/opt/solr/server/solr/newcore目录节点下。然后去http://localhost:8983/solr下操作 点击Core Admin 下的Add Core 填写name和instanceDir(就是刚才创建的新目录)，然后点击Add Core就可以了
+
+
+
+
+
+
+
+
+
+
 
 
