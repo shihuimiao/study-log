@@ -11,10 +11,10 @@ git rebase --continue   //继续rebase
 git push --force  //push 到线上
 
 
-#### -f尽量别用  是强制push
+#### 尽量别用-f  是强制push
 git push -u origin xxx -f
 
-- git rebase 发生冲突
+#### git rebase 发生冲突
 修改好之后
 git add .
 git rebase --continue
