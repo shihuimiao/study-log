@@ -1,16 +1,9 @@
-git 有关的
+### git 有关的
 
-解决冲突
+- 解决冲突
 从线上把master fetch到一个新的分支，然后把旧分支的东西merge到新分支，解决冲突，push新分支
 
-
-
-
-
-
-
-解决冲突的方法
-
+-解决冲突的方法
 git fetch origin develop:develop  //先把线上的develop分支拉到本地的develop
 git rebase develop   //把develop合并到自己的分支如shm_0609
 ... 用git mergetool工具    beyond compare软件  解决冲突  
@@ -18,14 +11,10 @@ git rebase --continue   //继续rebase
 git push --force  //push 到线上
 
 
-
-
+- -f尽量别用  是强制push
 git push -u origin xxx -f
 
-
-
-
-//git rebase 发生冲突
+- git rebase 发生冲突
 修改好之后
 git add .
 git rebase --continue
@@ -33,11 +22,7 @@ git push origin xxx -f
 就好了
 
 
-
-
-
-
-git 分支管理策略  (http://www.ruanyifeng.com/blog/2012/07/git.html)
+-git 分支管理策略  (http://www.ruanyifeng.com/blog/2012/07/git.html)
 
 git分支多了会产生分支混乱，所以分支管理很重要
 一、主分支Master
@@ -61,7 +46,7 @@ git分支多了会产生分支混乱，所以分支管理很重要
 修补bug分支是从Master分支上面分出来的。修补结束后，再合并进Master和Develop分支。它的命名，可以采用fixbug-*的形式。
 
 
-自己公司的分支策略：
+- 自己公司的分支策略：
 Master分支是线上用户使用的正式版本
 Develop是开发环境的测试版本
 release是测试环境测试们用来测试的版本
@@ -70,16 +55,26 @@ pre-release是预发步的测试版本
 每次pre-release是从master上切一个分支下来，修改bug也是从master上切分支的，然后有什么测试了也是从master上切分支的，一切都是以master为主，功能分支也是从master分支切。。。。。
 
 
+- Git结合Beyond Compare使用
+打开 Beyond Compare -> Beyond Compare Menu ->*** Install Command Line Tools***
+必须要安装Beyond Compare 命令工具,否则会报错
 
+```
+git config --global diff.tool bc3
+```
+当需要比较修改的时候,在终端中直接输入git difftool file.ext 就可以唤起****Beyond Compare****
 
+```
+git config --global merge.tool bc3
+git config --global mergetool.bc3 trustExitCode true
+```
+当代码发生冲突的时候,在终端中使用 git mergetool <conflict file> 即可唤起****Beyond Compare****,可谓是十分强大
 
-
-
-
-
-
-
-
+- 在使用git megetool 来解决冲突后,会生成 备份文件 (*.orig),大多数情况下不是我们想要的,在终端中配置:
+```
+git config --global mergetool.keepBackup false
+```
+这样就不会每次在解决冲突后生成对应的 .orig文件了.
 
 
 
